@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10 Parmak Yazma Testi</title>
+<style>
+
+body{
+    font-family: Arial;
+    background:#111;
+    color:white;
+    text-align:center;
+    margin:0;
+}
+
+h1{margin-top:30px;}
+
+button{
+    padding:15px 30px;
+    font-size:18px;
+    margin:10px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#4682B4;
+    color:white;
+}
+
+#word{
+    font-size:40px;
+    margin:30px;
+}
+
+#input{
+    font-size:25px;
+    padding:10px;
+    width:80%;
+    max-width:400px;
+}
+
+.keyboard{
+    margin-top:40px;
+}
+
+.key{
+    display:inline-block;
+    padding:12px;
+    margin:4px;
+    background:#444;
+    border-radius:6px;
+    min-width:35px;
+}
+
+.active{
+    background:yellow;
+    color:black;
+}
+
+.result{
+    font-size:22px;
+    margin:10px;
+}
+
+.hidden{display:none;}
+
+</style>
+</head>
+<body>
+
+<h1>10 Parmak Yazma Testi</h1>
+
+<div id="menu">
+    <button onclick="startTest(30)">30 Kelime</button>
+    <button onclick="startTest(50)">50 Kelime</button>
+</div>
+
+<div id="game" class="hidden">
+    <div id="progress"></div>
+    <div id="word"></div>
+    <input id="input" autocomplete="off">
+</div>
+
+<div id="resultScreen" class="hidden">
+    <h2>TEST BİTTİ</h2>
+    <div id="correct" class="result"></div>
+    <div id="wrong" class="result"></div>
+    <div id="wpm" class="result"></div>
+    <div id="accuracy" class="result"></div>
+    <br>
+    <button onclick="location.reload()">BAŞA DÖN</button>
+</div>
+
+<div class="keyboard" id="keyboard"></div>
+
+<script>
+
+const wordPool = [
+"merhaba","bilgisayar","klavye","yazılım","python","geliştirme","ekran",
+"internet","program","hızlı","yavaş","oyun","teknoloji","türkiye",
+"istanbul","ankara","izmir","masa","sandalye","defter",
+"kalem","kitap","öğretmen","öğrenci","sınav","başarı","mutluluk",
+"hayat","zaman","gelecek","geçmiş","bugün","yarın","sevgi",
+"saygı","dostluk","arkadaş","çalışma","emek","sabır",
+"azim","umut","enerji","bilgi","deneme","hedef",
+"zafer","galibiyet","yenilik","tasarım"
+];
+
+const keyboardLayout = [
+"QWERTYUIOPĞÜ",
+"ASDFGHJKLŞİ",
+"ZXCVBNMÖÇ"
+];
+
+let words=[];
+let currentIndex=0;
+let correct=0;
+let wrong=0;
+let startTime;
+let totalWords=30;
+
+const wordEl=document.getElementById("word");
+const inputEl=document.getElementById("input");
+const progressEl=document.getElementById("progress");
+
+function createKeyboard(){
+    const kb=document.getElementById("keyboard");
+    keyboardLayout.forEach(row=>{
+        const rowDiv=document.createElement("div");
+        row.split("").forEach(letter=>{
+            const key=document.createElement("div");
+            key.className="key";
+            key.id="key-"+letter;
+            key.textContent=letter;
+            rowDiv.appendChild(key);
+        });
+        kb.appendChild(rowDiv);
+    });
+}
+
+function startTest(count){
+    totalWords=count;
+    words=[...wordPool].sort(()=>0.5-Math.random()).slice(0,count);
+    document.getElementById("menu").classList.add("hidden");
+    document.getElementById("game").classList.remove("hidden");
+    currentIndex=0;
+    correct=0;
+    wrong=0;
+    startTime=new Date();
+    nextWord();
+    inputEl.focus();
+}
+
+function nextWord(){
+    if(currentIndex>=totalWords){
+        finishTest();
+        return;
+    }
+    wordEl.textContent=words[currentIndex];
+    progressEl.textContent=(currentIndex+1)+" / "+totalWords;
+    inputEl.value="";
+}
+
+inputEl.addEventListener("keydown",e=>{
+    const key=e.key.toUpperCase();
+    const keyDiv=document.getElementById("key-"+key);
+    if(keyDiv){
+        keyDiv.classList.add("active");
+        setTimeout(()=>keyDiv.classList.remove("active"),150);
+    }
+
+    if(e.key===" "){
+        e.preventDefault();
+        if(inputEl.value.trim()===words[currentIndex]){
+            correct++;
+        }else{
+            wrong++;
+        }
+        currentIndex++;
+        nextWord();
+    }
+});
+
+function finishTest(){
+    document.getElementById("game").classList.add("hidden");
+    document.getElementById("resultScreen").classList.remove("hidden");
+
+    const time=(new Date()-startTime)/60000;
+    const wpm=(correct/time).toFixed(2);
+    const accuracy=((correct/totalWords)*100).toFixed(2);
+
+    document.getElementById("correct").textContent="Doğru: "+correct;
+    document.getElementById("wrong").textContent="Yanlış: "+wrong;
+    document.getElementById("wpm").textContent="WPM: "+wpm;
+    document.getElementById("accuracy").textContent="Doğruluk: %"+accuracy;
+}
+
+createKeyboard();
+
+</script>
+
+</body>
+</html>
